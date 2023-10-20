@@ -13,7 +13,7 @@ logo = '''
  | |_| |  | | \__ \ | | | | | | | | | |
   \__, |  |_| |___/ |_| |_| |_| |_| |_|
    __/ |                               
-  |___/               
+  |___/                                 
 '''
 
 class END:
@@ -186,7 +186,6 @@ class MOUSE:
             plt.title("NORMAL_MOUSE")
             plt.scatter(x=x_list ,y=y_list)
             plt.show()
-    
     # 获取鼠标三个按键的二进制，这一段写的很臭，用处估计也不大
     def Get_Mouse_press(data_list):
         Mouse_left_press = ""
@@ -282,13 +281,14 @@ class LOG:
         '''
         型号:Lightspeed Receiver(0xc539)
         usbhid.data = 020000130000000000
-        去掉头部两个标识符就是正常的键盘流量
+        去掉头部两个标识符就是正常的鼠标流量
         '''
         print("[+] 型号:Logitech Lightspeed Receiver(0xc539)\n")
         changed_datalist = []
         for i in data_list:
-            changed_datalist.append(i[2:])
-        KEYBOARD.Value_2_PlainText(changed_datalist)
+            i = f"{i[2:4]}{i[6:8]}{i[10:12]}00"
+            changed_datalist.append(i)
+        MOUSE.Value_2_plt(changed_datalist)
     
     def LOG_G502_MOUSE(data_list):
         '''
@@ -307,6 +307,7 @@ class LOG:
     def Mouse(data_list):
         '''
         型号:Mouse(0xc077)
+        数据类型:普通类型
         '''
         print("[+] 型号:Logitech Mouse(0xc077)\n")
         MOUSE.Value_2_plt(data_list)
@@ -314,9 +315,45 @@ class LOG:
     def Unknown_keyboard(data_list):
         '''
         型号:Unknown(0xc341)
+        数据类型:普通类型
         '''
         print("[+] 型号:Logitech Unknow Keyboard Type(0xc341)\n")
         KEYBOARD.Value_2_PlainText(data_list)
+
+    def G304_Wireless(data_list):
+        '''
+        型号: G304 无线鼠标(0xc53f)
+        数据结构(usbhid.data):020100ffff01000000
+        [2:4] press    [6:8] x位移  [10:12] y位移
+        '''
+        print("[+] G304 Wireless(0xc53f)")
+        changed_list = []
+        for i in data_list:
+            i = f"{i[2:4]}{i[6:8]}{i[10:12]}00"
+            changed_list.append(i)
+        MOUSE.Value_2_plt(changed_list)
+
+    def G102_Wire(data_list):
+        '''
+        型号: G102 有线鼠标
+        '''
+        ...
+
+class Razer:
+    # Razer USA, Ltd (0x1532)
+
+    def Basilisk_Mouse(data_list):
+        '''
+        型号:RC30-0315, Gaming Mouse [Basilisk x HyperSpeed] (0x0083)
+        数据结构(usbhid.data):01feff00feffffff
+        [0:2] press  [2:4] x位移 [4:6] y轴
+        '''
+        print("[+] RC30-0315, Gaming Mouse [Basilisk x HyperSpeed] (0x0083)")
+        changed_list = []
+        for i in data_list:
+            i = f"{i[0:2]}{i[2:4]}{i[4:6]}00"
+            changed_list.append(i)
+        MOUSE.Value_2_plt(changed_list)
 
 class Apple:
     # Apple, Inc.(0x05ac)
@@ -339,7 +376,7 @@ if __name__ == "__main__":
         exit(-1)
     file ,ip ,field = GET_START.Get_Basic_Parameter()
     Field_Value ,ID = GET_START.Build_Cmd_Get_Data(file_name=file ,des_IP=ip ,field_name=field)
-    print(f"[+] [DEVICE_LIST] {ID}\n" ,"-"*50)
+    print(f"[+] [DEVICE_LIST] {ID}\n[+] 您可以在USB_ID_List.txt中查找具体的设备名称\n" ,"-"*50)
     if "0x046d" in ID:
         Judge_Counter += 1
         # 罗技的设备
@@ -351,6 +388,10 @@ if __name__ == "__main__":
             LOG.Mouse(Field_Value)
         elif ID["0x046d"] == "0xc341":
             LOG.Unknown_keyboard(Field_Value)
+        elif ID["0x046d"] == "0xc53f":
+            LOG.G304_Wireless(Field_Value)
+        elif ID["0x046d"] == "...":
+            LOG.G102_Wire(Field_Value)
         print("\n"*3 ,"-"*50)
 
     if "0x056a" in ID:
@@ -370,6 +411,13 @@ if __name__ == "__main__":
             Apple.ANSI(Field_Value)
         print("\n"*3 ,"-"*50)
 
+    if "0x1532" in ID:
+        Judge_Counter += 1
+        # 雷蛇的设备
+        if ID["0x1532"] == "0x0083":
+            Razer.Basilisk_Mouse(Field_Value)
+        print("\n"*3 ,"-"*50)
+
     if Judge_Counter == 0:
         if len(Field_Value[1].strip("\n")) == 16:
             KEYBOARD.Value_2_PlainText(Field_Value)
@@ -378,5 +426,5 @@ if __name__ == "__main__":
         else:
             END.Without_Match()
         print("\n"*3 ,"-"*50)
-        
+
     END.Message()
