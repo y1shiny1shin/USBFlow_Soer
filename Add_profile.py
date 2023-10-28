@@ -1,6 +1,5 @@
 import yaml
 from USBFlow_Soer import *
-import operator
 
 '''
 添加设备的模板,注意:需要添加到对应的公司
@@ -14,6 +13,13 @@ import operator
 
 添加的时候请师傅注意大小写和缩进;
 添加完成只需要工具目录下执行一次即可
+
+如果是未添加过的Unknown的设备,如下是添加新设备的模版
+    "Company_ID": 
+      Company_ID: ""
+      Device_ID: ""
+      Device_Type: ""
+      Device_DefName: ""
 '''
 
 des_dir = '''
@@ -87,6 +93,19 @@ Apple:
     Device_Name: "Aluminium Keyboard (ANSI)"
     Device_Type: "KeyBoard"
     Device_DefName: "ANSI"
+
+Unknown:
+    "0x256c": 
+      Company_ID: "0x256c"
+      Device_ID: "0x006d"
+      Device_Type: "Wacom Like"
+      Device_DefName: "Wacom_Like_1"
+
+    "0x093a":
+      Company_ID: "0x093a"
+      Device_ID: "0x2530"
+      Device_Type: "Mouse Like"
+      Device_DefName: "Mouse_Like_1"
 
 Default:
   - type: "Mouse"
