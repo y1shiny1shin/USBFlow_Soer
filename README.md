@@ -9,5 +9,6 @@ Usage : python3 USBFlow_Soer.py -f filename -p usb.src -d [usbhid.data/usb.capda
   更新日志:在zeror师傅的指导下，对代码进行了重构，现在添加新设备将更加简单和易懂；
   由于本工具原理是穷举，所以难免会出现解密不了的数据，届时，还烦请师傅您将流量包发到邮箱`y1shin@163.com`谢谢师傅您的支持
 
-由于不知道为什么有些demo上传不进去，于是就上传到网盘了:https://pan.baidu.com/s/1qEL3mfSJLOBig0tSq9UV7Q?pwd=love `如果需要的话，烦请师傅手动下一下
+由于不知道为什么有些demo上传不进去，于是就上传到网盘了:`https://pan.baidu.com/s/1qEL3mfSJLOBig0tSq9UV7Q?pwd=love`如果需要的话，烦请师傅手动下一下
 
+另外，我后面还会写一点我对于USB流量还原的拙见，届时，希望师傅们能指出我的错误之处🤞🤞🤞🤞🤞🤞🤞
