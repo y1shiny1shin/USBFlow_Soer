@@ -1,9 +1,11 @@
 '''Author y1shin@163.com'''
 import os
 import sys
+import yaml
 import argparse
 import platform
 import matplotlib.pyplot as plt
+import operator
 
 logo = '''
           __         _       _         
@@ -18,9 +20,9 @@ logo = '''
 
 class END:
     def Without_Match():
-        print("[-] 解密失败,请联系QQ:2729913542更新USB数据")
+        print("-"*50 ,"\n[-] 解密失败,请联系QQ:2729913542更新USB数据")
     def Message():
-        print("[+] 工具由y1shin开发,欢迎加QQ:2729913542与我讨论")
+        print("-"*50 ,"\n[+] 工具由y1shin开发,欢迎加QQ:2729913542与我讨论")
 
 class GET_START:
     def Get_Basic_Parameter():
@@ -34,10 +36,13 @@ class GET_START:
         args = parser.parse_args()
         return args.f ,args.p ,args.d
         
-    def Build_Cmd_Get_Data(file_name:str ,des_IP:str ,field_name:str):
+    def Build_Cmd_And_Get_Data(file_name:str ,des_IP:str ,field_name:str):
+        Reponse_IP = des_IP[:-1]+"0"
         os.system(f"tshark -r {file_name} -T fields -Y 'usb.src=={des_IP}' -e {field_name} > temp_data.out" )
         os.system(f"tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src!={des_IP}\" -e \"usb.idProduct\" > temp_id.out""")
         os.system(f"tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src!={des_IP}\" -e \"usb.idVendor\" > temp_vendor.out""")
+        os.system(f"tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src=={Reponse_IP}\" -e \"usb.idVendor\" > temp_Response.out")
+        os.system(f"tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src=={Reponse_IP}\" -e \"usb.idProduct\" > temp_Res.out")
         
         f = open("temp_data.out")
         USB_Value_List = f.readlines()
@@ -49,13 +54,22 @@ class GET_START:
 
         f = open("temp_vendor.out")
         USB_Vendor_Id = f.read().strip().split()
-        os.system(f"rm temp_data.out | rm temp_id.out | rm temp_vendor.out")
+        f.close()
 
-        ID = {}
+        f = open("temp_Response.out")
+        Des_VendorID = f.read().strip().split()
+        f.close()
+
+        f = open("temp_Res.out")
+        Des_ProductID = f.read().strip().split()
+        f.close()
+        os.system(f"rm temp_data.out | rm temp_id.out | rm temp_vendor.out | rm temp_Response.out | rm temp_Res.out")
+
+        ID = []
         for i in range(len(USB_Vendor_Id)):
-            ID[USB_Vendor_Id[i]] = USB_Device_Id[i]
+            ID.append((USB_Vendor_Id[i] ,USB_Device_Id[i]))
         
-        return USB_Value_List ,ID
+        return USB_Value_List ,ID ,(Des_VendorID[0] ,Des_ProductID[0])
 
 class KEYBOARD:
     '''
@@ -186,6 +200,7 @@ class MOUSE:
             plt.title("NORMAL_MOUSE")
             plt.scatter(x=x_list ,y=y_list)
             plt.show()
+
     # 获取鼠标三个按键的二进制，这一段写的很臭，用处估计也不大
     def Get_Mouse_press(data_list):
         Mouse_left_press = ""
@@ -230,6 +245,7 @@ class MOUSE:
             f.write(Mouse_mid_press)
             f.close()
             print(f"[+] 中键数据已经保存在了运行目录下")
+        print("-"*50)
 
 class WACOM:
     # Wacom Co., Ltd(0x056a)
@@ -281,7 +297,8 @@ class LOG:
         '''
         型号:Lightspeed Receiver(0xc539)
         usbhid.data = 020000130000000000
-        去掉头部两个标识符就是正常的鼠标流量
+        头部的02是标识符,相当于是识别的符号
+        [2:4]是press  [6:8]是x轴变化  [10:12]是y轴变化
         '''
         print("[+] 型号:Logitech Lightspeed Receiver(0xc539)\n")
         changed_datalist = []
@@ -336,8 +353,15 @@ class LOG:
     def G102_Wire(data_list):
         '''
         型号: G102 有线鼠标
+        数据结构(usbhid.data):0100fefffeff0000
+        [0:2] press   [4:6]  x位移   [8:10]  y位移
         '''
-        ...
+        print("[+] G102 Mouse(0xc09d)")
+        changed_list =[]
+        for i in data_list:
+            i = f"{i[0:2]}{i[4:6]}{i[8:10]}00"
+            changed_list.append(i)
+        MOUSE.Value_2_plt(changed_list)
 
 class Razer:
     # Razer USA, Ltd (0x1532)
@@ -369,62 +393,130 @@ class Apple:
             i = i.strip("\n")
             print(normal_Keys[i[4:6]] ,end="")
 
-if __name__ == "__main__":
-    Judge_Counter = 0
-    if platform.system() != 'Linux':
+class Unknown_Type_Device:
+    '''
+    这个类是专门用来存储特殊或者是没有名字的USBVendor,
+    所以我给它取的名字就叫Unknown,函数名也将用它的流量类似什么标准USB流量来命名
+    '''
+
+    def Check_Unknown_And_Recover(DesID_List ,profile_data ,Field_Value):
+        if DesID_List[0] in profile_data["Unknown"]:
+            Def_Name = profile_data["Unknown"][DesID_List[0]]["Device_DefName"]
+            operator.methodcaller(Def_Name ,Field_Value)(Unknown_Type_Device)
+            END.Message()
+            exit(-1)
+        else:
+            return None
+
+    def Wacom_Like_1(Field_Value):
+        '''
+        设备ID:0x006d  公司ID:0x256c
+        流量格式:0ac0a63f37420000161a(usbhid.data)
+        [2:4]==c1为有效数据  [4:8] 为x坐标   [8:12] 为y坐标;并且是大端储存
+        '''
+        print("[+] 类似Wacom的画板")
+        xlist ,ylist = [] ,[]
+        for data in Field_Value:
+            xpos = int(data[4:6] ,16) + int(data[6:8] ,16)*256
+            ypos = int(data[8:10] ,16) + int(data[10:12] ,16)*256
+            if data[2:4] == "c1":
+                xlist.append(xpos)
+                ylist.append(-ypos)
+        plt.scatter(xlist ,ylist)
+        plt.show()
+        
+    def Mouse_Like_1(Field_Value):
+        '''
+        这是zeror师傅发我的一个流量包
+        设备ID:0x2530  公司ID:0x093a
+        流量格式:0103fd000300fdff(usbhid.data)
+        [0:2] 按键   [2:4] x位移   [4:6] y位移
+        '''
+        Changed_Value = []
+        for i in Field_Value:
+            i = f"{i[0:2]}{i[2:4]}{i[4:6]}00"
+            Changed_Value.append(i)
+        MOUSE.Value_2_plt(Changed_Value)
+
+    def KeyBoard_Like_1():
+        ...
+
+def Get_defname(Device_ID:str ,Device_List:list) -> str:
+    # 返回查找到对应公司下的产品对应的解密函数名
+    for i in Device_List:
+        if i["Device_ID"] == Device_ID:
+            return i["Device_DefName"]
+
+def main():
+    # 检查系统是否是linux系统
+    if platform.system() != "Linux":
         print(f"您当前的操作系统{platform.system()},本工具只适用于Linux系统!")
         exit(-1)
+    
+    # 读取配置文件
+    profile_data = {}
+    with open("profile.yaml" ,"r" ,encoding="utf-8") as f:
+        profile_data = f.read()
+        profile_data = yaml.safe_load(profile_data)
+
+    # 从命令行读取流量包的相关数据
     file ,ip ,field = GET_START.Get_Basic_Parameter()
-    Field_Value ,ID = GET_START.Build_Cmd_Get_Data(file_name=file ,des_IP=ip ,field_name=field)
-    print(f"[+] [DEVICE_LIST] {ID}\n[+] 您可以在USB_ID_List.txt中查找具体的设备名称\n" ,"-"*50)
-    if "0x046d" in ID:
-        Judge_Counter += 1
-        # 罗技的设备
-        if ID["0x046d"] == "0xc539":
-            LOG.LOG_Lightspeed_Reveiver(Field_Value)
-        elif ID["0x046d"] == "0xc08b":
-            LOG.LOG_G502_MOUSE(Field_Value)
-        elif ID["0x046d"] == "0xc077":
-            LOG.Mouse(Field_Value)
-        elif ID["0x046d"] == "0xc341":
-            LOG.Unknown_keyboard(Field_Value)
-        elif ID["0x046d"] == "0xc53f":
-            LOG.G304_Wireless(Field_Value)
-        elif ID["0x046d"] == "...":
-            LOG.G102_Wire(Field_Value)
-        print("\n"*3 ,"-"*50)
+    Field_Value ,ID_List ,DesID_List = GET_START.Build_Cmd_And_Get_Data(file_name=file ,des_IP=ip ,field_name=field)
+    print(f"[+] [DEVICE_LIST]: {ID_List}\n[+] 您可以在USB_ID_List.txt中查找具体的设备名称\n" ,"-"*50)
+    
+    # 如果返回值有问题，报错并且停止程序
+    if len(Field_Value) == 0:
+        print(f"[-] 源IP为{ip},字段名称为{field}提取出来的数据为空,请检查一下IP和字段是否正确以及对应IP下是否有数据")
+        exit(-1)
+    # 获取记录的所有公司的ID号
+    Company_List = profile_data["Company_List"][0]
 
-    if "0x056a" in ID:
-        Judge_Counter += 1
-        # Wacom 数位板
-        if ID["0x056a"] == "0x030e":
-            WACOM.CTL_480(Field_Value)
-        elif ID["0x056a"] == "0x0357":
-            WACOM.PTH_660(Field_Value)
-        print("\n"*3 ,"-"*50)
+    # 判断目的IP是否是Unknown类型的数据,并且解密
+    Unknown_Type_Device.Check_Unknown_And_Recover(DesID_List ,profile_data ,Field_Value)
 
-    if "0x05ac" in ID:
-        Judge_Counter += 1
-        # 苹果的设备 但是没有钱买苹果( 所以这个ID就只能搁置一下
-        # 等待完善ing...
-        if ID["0x05ac"] == "0x024f":
-            Apple.ANSI(Field_Value)
-        print("\n"*3 ,"-"*50)
-
-    if "0x1532" in ID:
-        Judge_Counter += 1
-        # 雷蛇的设备
-        if ID["0x1532"] == "0x0083":
-            Razer.Basilisk_Mouse(Field_Value)
-        print("\n"*3 ,"-"*50)
-
-    if Judge_Counter == 0:
-        if len(Field_Value[1].strip("\n")) == 16:
-            KEYBOARD.Value_2_PlainText(Field_Value)
-        elif len(Field_Value[1].strip("\n")) == 8:
+    # 处理目的IP的数据
+    if DesID_List[0] in Company_List:
+        # 获取配置文件中的类名
+        class_name = Company_List[DesID_List[0]]
+        # 获取配置文件中的函数名
+        Device_List = profile_data[class_name][1:]
+        Def_Name = Get_defname(DesID_List[1] ,Device_List)
+        # 将获取的函数名和类名实例化并且执行
+        operator.methodcaller(Def_Name ,Field_Value)(globals()[class_name])
+    # 处理默认值
+    else:
+        if len(Field_Value[0]) == 8:
             MOUSE.Value_2_plt(Field_Value)
         else:
-            END.Without_Match()
-        print("\n"*3 ,"-"*50)
-
+            KEYBOARD.Value_2_PlainText(Field_Value)  
+ 
+    # 询问是否需要爆破所有的值
+    Brute_Choice = input("需要爆破所有的数据吗?[y/N](也许会不准确or是报错):").upper()
+    if Brute_Choice != "Y":
+        END.Message()
+        exit(-1)
+    
+    # 这一段是爆破所有的数据,也不是都能爆破出来,只是给做题的时候提供一点线索(如果有的话)
+    for i in range(len(ID_List)):
+        # 排除输入的IP
+        if ID_List[i] == DesID_List:
+            continue
+        # 获取记录过的设备的数据
+        if ID_List[i][0] in Company_List:
+            class_name = Company_List[ID_List[i][0]]
+            Device_List = profile_data[class_name][1:]
+            Def_Name = Get_defname(ID_List[i][1] ,Device_List)
+            # 将获取的函数名和类名实例化并且执行
+            operator.methodcaller(Def_Name ,Field_Value)(globals()[class_name])
+        # 处理默认值
+        elif len(Field_Value[0]) == 8 or len(Field_Value[0]) == 16:
+            if len(Field_Value[0]) == 8:
+                MOUSE.Value_2_plt(Field_Value)
+            else:
+                KEYBOARD.Value_2_PlainText(Field_Value)   
+        else:
+            print(f"[-] {ID_List[i]}解密失败\n" ,"-"*50)   
     END.Message()
+
+if __name__ == "__main__":
+    main()
