@@ -1,0 +1,101 @@
+import yaml
+from USBFlow_Soer import *
+import operator
+
+'''
+添加设备的模板,注意:需要添加到对应的公司
+如果列表中没有该公司,需要手动加公司的ID和Name,
+如果时间紧急,可以直接将流量的压缩包发到y1shin@163.com就行,谢谢师傅的支持
+
+  - Device_ID: ""
+    Device_Name: ""
+    Device_Type: ""
+    Device_DefName: ""
+
+添加的时候请师傅注意大小写和缩进;
+添加完成只需要工具目录下执行一次即可
+'''
+
+des_dir = '''
+Company_List: 
+  - "0x046d": "LOG"
+    "0x056a": "WACOM"
+    "0x1532": "Razer"
+    "0x05ac": "Apple"
+LOG:
+  - Company_ID: "0x046d"
+    Company_name: "Logitech, Inc."
+
+  - Device_ID: "0xc539"
+    Device_Name: "Lightspeed Receiver"
+    Device_Type: "Mouse"
+    Device_DefName: "LOG_Lightspeed_Reveiver"
+
+  - Device_ID: "0xc08b"
+    Device_Name: "Logitech G502 SE HERO Gaming Mouse"
+    Device_Type: "Mouse"
+    Device_DefName: "LOG_G502_MOUSE"
+
+  - Device_ID: "0xc077"
+    Device_Name: "Logitech Mouse"
+    Device_Type: "Mouse"
+    Device_DefName: "Mouse"
+
+  - Device_ID: "0xc341"
+    Device_Name: "Logitech Unknow Keyboard Type"
+    Device_Type: "KeyBoard"
+    Device_DefName: "Unknown_keyboard"
+
+  - Device_ID: "0xc53f"
+    Device_Name: "G304 Wireless"
+    Device_Type: "Mouse"
+    Device_DefName: "G304_Wireless"
+
+  - Device_ID: "0xc09d"
+    Device_Name: "G102 Wire"
+    Device_Type: "Mouse"
+    Device_DefName: "G102_Wire"
+
+WACOM:
+  - Company_ID: "0x056a"
+    Company_name: "Wacom Co., Ltd"
+
+  - Device_ID: "0x030e"
+    Device_Name: "CTL-480 [Intuos Pen (S)]"
+    Device_Type: "wacom"
+    Device_DefName: "CTL_480"
+
+  - Device_ID: "0x0357"
+    Device_Name: "PTH-660 [Intuos Pro (M)]"
+    Device_Type: "wacom"
+    Device_DefName: "PTH_660"
+
+Razer:
+  - Company_ID: "0x1532"
+    Company_name: "Razer USA, Ltd"
+  
+  - Device_ID: "0x0083"
+    Device_Name: "RC30-0315, Gaming Mouse [Basilisk x HyperSpeed]"
+    Device_Type: "Mouse"
+    Device_DefName: "Basilisk_Mouse"
+
+Apple:
+  - Company_ID: "0x05ac"
+    Company_name: "Apple, Inc."
+
+  - Device_ID: "0x024f"
+    Device_Name: "Aluminium Keyboard (ANSI)"
+    Device_Type: "KeyBoard"
+    Device_DefName: "ANSI"
+
+Default:
+  - type: "Mouse"
+    datalen: 8
+    name: "Default Mouse"
+  - type: "KeyBoard"
+    datalen: 16
+    name: "Default KeyBoard"
+'''
+dict_var = yaml.safe_load(des_dir)
+with open("profile.yaml" ,"w" ,encoding="utf-8") as f:
+    yaml.dump(dict_var ,f ,default_flow_style=False)
