@@ -38,38 +38,41 @@ class GET_START:
         
     def Build_Cmd_And_Get_Data(file_name:str ,des_IP:str ,field_name:str):
         Reponse_IP = des_IP[:-1]+"0"
-        os.system(f"tshark -r {file_name} -T fields -Y 'usb.src=={des_IP}' -e {field_name} > temp_data.out" )
-        os.system(f"tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src!={des_IP}\" -e \"usb.idProduct\" > temp_id.out""")
-        os.system(f"tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src!={des_IP}\" -e \"usb.idVendor\" > temp_vendor.out""")
-        os.system(f"tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src=={Reponse_IP}\" -e \"usb.idVendor\" > temp_Response.out")
-        os.system(f"tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src=={Reponse_IP}\" -e \"usb.idProduct\" > temp_Res.out")
+        os.system(f'tshark -r {file_name} -T fields -Y "usb.src=={des_IP}" -e {field_name} > temp_data.out')
+        os.system(f'tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src!={des_IP}\" -e \"usb.idProduct\" > temp_id.out')
+        os.system(f'tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src!={des_IP}\" -e \"usb.idVendor\" > temp_vendor.out')
+        os.system(f'tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src=={Reponse_IP}\" -e \"usb.idVendor\" > temp_Response.out')
+        os.system(f'tshark -r {file_name} -T fields -Y \"usb && usb.src!=host && usb.src=={Reponse_IP}\" -e \"usb.idProduct\" > temp_Res.out')
         
-        f = open("temp_data.out")
-        USB_Value_List = f.readlines()
-        f.close()
+        with open("temp_data.out") as f:
+            USB_Value_List = f.readlines()
+        with open("temp_id.out") as f:
+            USB_Device_Id = f.read().strip().split()
+        with open("temp_vendor.out") as f:
+            USB_Vendor_Id = f.read().strip().split()
+        with open("temp_Response.out") as f:
+            Des_VendorID = f.read().strip().split()
+        with open("temp_Res.out") as f:
+            Des_ProductID = f.read().strip().split()
 
-        f = open("temp_id.out")
-        USB_Device_Id = f.read().strip().split()
-        f.close()
-
-        f = open("temp_vendor.out")
-        USB_Vendor_Id = f.read().strip().split()
-        f.close()
-
-        f = open("temp_Response.out")
-        Des_VendorID = f.read().strip().split()
-        f.close()
-
-        f = open("temp_Res.out")
-        Des_ProductID = f.read().strip().split()
-        f.close()
-        os.system(f"rm temp_data.out | rm temp_id.out | rm temp_vendor.out | rm temp_Response.out | rm temp_Res.out")
-
+        # 在zeror师傅的指导下，旨在增强代码的健壮性
+        temp_dirlist = ["temp_data.out" ,"temp_id.out" ,"temp_vendor.out" ,"temp_Response.out" ,"temp_Res.out" ,] 
+        for i in temp_dirlist:
+            try:
+                os.remove(i)
+            except:
+                print(f"运行名录下临时文件{i}未能删除,请手动删除")
+        
+        # 读取所有的ID值
         ID = []
         for i in range(len(USB_Vendor_Id)):
             ID.append((USB_Vendor_Id[i] ,USB_Device_Id[i]))
         
-        return USB_Value_List ,ID ,(Des_VendorID[0] ,Des_ProductID[0])
+        # 这里是为了解决出题人只截取部分流量包的问题
+        if len(Des_VendorID) != 0:
+            return USB_Value_List ,ID ,(Des_VendorID[0] ,Des_ProductID[0])
+        else:
+            return USB_Value_List ,ID ,(None ,None)
 
 class KEYBOARD:
     '''
@@ -468,6 +471,7 @@ def main():
     if len(Field_Value) == 0:
         print(f"[-] 源IP为{ip},字段名称为{field}提取出来的数据为空,请检查一下IP和字段是否正确以及对应IP下是否有数据")
         exit(-1)
+    
     # 获取记录的所有公司的ID号
     Company_List = profile_data["Company_List"][0]
 
@@ -483,13 +487,14 @@ def main():
         Def_Name = Get_defname(DesID_List[1] ,Device_List)
         # 将获取的函数名和类名实例化并且执行
         operator.methodcaller(Def_Name ,Field_Value)(globals()[class_name])
+    
     # 处理默认值
     else:
         if len(Field_Value[0]) == 8:
             MOUSE.Value_2_plt(Field_Value)
         else:
             KEYBOARD.Value_2_PlainText(Field_Value)  
- 
+
     # 询问是否需要爆破所有的值
     Brute_Choice = input("需要爆破所有的数据吗?[y/N](也许会不准确or是报错):").upper()
     if Brute_Choice != "Y":
