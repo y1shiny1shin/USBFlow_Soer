@@ -382,6 +382,19 @@ class Razer:
             changed_list.append(i)
         MOUSE.Value_2_plt(changed_list)
 
+    def DeathAdder_Mouse(data_list):
+        '''
+        型号:RZ01-0145, Gaming Mouse [DeathAdder 2000 (Alternate)] (0x004f)
+        数据结构(usbhid.data):0006fe000600feff
+        [0:2] press  [2:4] x位移 [4:6] y位移
+        '''
+        print("[+] RZ01-0145, Gaming Mouse [DeathAdder 2000 (Alternate)] (0x004f)")
+        changed_list = []
+        for i in data_list:
+            i = f"{i[0:2]}{i[2:4]}{i[4:6]}00"
+            changed_list.append(i)
+        MOUSE.Value_2_plt(changed_list)
+
 class Apple:
     # Apple, Inc.(0x05ac)
     def ANSI(data_list):
@@ -402,10 +415,19 @@ class Unknown_Type_Device:
     所以我给它取的名字就叫Unknown,函数名也将用它的流量类似什么标准USB流量来命名
     '''
 
-    def Check_Unknown_And_Recover(DesID_List ,profile_data ,Field_Value):
+    def Check_Unknown_And_Recover(DesID_List ,profile_data ,Field_Value ,ip ,file ,Company_List):
         if DesID_List[0] in profile_data["Unknown"]:
             Def_Name = profile_data["Unknown"][DesID_List[0]]["Device_DefName"]
             operator.methodcaller(Def_Name ,Field_Value)(Unknown_Type_Device)
+
+            # 询问是否需要爆破所有的值
+            Brute_Choice = input("需要爆破所有的数据吗?[y/N](也许会不准确or是报错):").upper()
+            if Brute_Choice != "Y":
+                END.Message()
+                exit(-1)
+            else:
+                Burteforce(file ,ip ,profile_data ,Company_List)
+            
             END.Message()
             exit(-1)
         else:
@@ -450,15 +472,65 @@ def Get_defname(Device_ID:str ,Device_List:list) -> str:
         if i["Device_ID"] == Device_ID:
             return i["Device_DefName"]
 
+def Burteforce(file ,ip ,profile_data ,Company_List):
+    os.system(f'tshark -r {file} -T fields -Y \"usb.src!=host && usb.src!={ip}\" -e usb.src > temp_ALLIP.out')
+    with open("temp_ALLIP.out") as f:
+        ALL_IP_List = [i.strip("\n") for i in (list(set(f.readlines()))) if i.strip("\n")[-1] != "0"]
+    
+    # 判断是否还有数据可以提取
+    if len(ALL_IP_List) == 0:
+        print("[-] 已经没有数据可以提取")
+        END.Message()
+        exit(-1)
+    print(f"[+] 有如下{ALL_IP_List}IP可以提取数据")
+
+    for Other_ip in ALL_IP_List:
+        # 这一段是在读取此IP的数据类型(usbhid.data/usb.capdata)
+        print("-"*50 ,f"\n[=] 正在提取 {Other_ip} 地址的数据")
+        
+        Zero_ip = Other_ip[:-1] + "0"
+        os.system(f'tshark -r {file} -T fields -Y "usb.src=={Zero_ip}" -e usb.bInterfaceClass > temp_dataType.out')
+        with open("temp_dataType.out") as f: 
+            dataType = "".join(t for t in [i.strip("\n") for i in list(set(f.readlines()))])
+        if "0x03" in dataType:
+            dataType = "usbhid.data"
+        else:continue # 由于还没发现usb.capdata的数据,所以遇到不是usbhid.data的直接跳过
+        
+        # 这段就是把main函数的一部分给套过来了,因为不会递归(
+        Field_Value ,ID_List ,DesID_List = GET_START.Build_Cmd_And_Get_Data(file_name=file ,des_IP=Other_ip ,field_name=dataType)
+
+        if len(Field_Value) == 0:
+            print(f"[-] 源IP为{ip},字段名称为{dataType}提取出来的数据为空\n" ,"-"*50)
+            continue
+        Unknown_Type_Device.Check_Unknown_And_Recover(DesID_List ,profile_data ,Field_Value ,Other_ip ,file ,Company_List)
+
+        # 处理目的IP的数据
+        if DesID_List[0] in Company_List:
+            # 获取配置文件中的类名
+            class_name = Company_List[DesID_List[0]]
+            # 获取配置文件中的函数名
+            Device_List = profile_data[class_name][1:]
+            Def_Name = Get_defname(DesID_List[1] ,Device_List)
+            # 将获取的函数名和类名实例化并且执行
+            operator.methodcaller(Def_Name ,Field_Value)(globals()[class_name])
+        # 处理默认值
+        else:
+            if len(Field_Value[0].strip("\n")) == 8:
+                MOUSE.Value_2_plt(Field_Value)
+            elif len(Field_Value[0].strip("\n")) == 16:
+                KEYBOARD.Value_2_PlainText(Field_Value)
+            else:
+                print(f"[-] 地址为 {Other_ip} 的数据未能解密\n" ,"-"*50)
+
 def main():
     # 检查系统是否是linux系统
     if platform.system() != "Linux":
-        print(f"您当前的操作系统{platform.system()},本工具只适用于Linux系统!")
+        print(f"[-] 您当前的操作系统{platform.system()},本工具只适用于Linux系统!")
         exit(-1)
     
     # 读取配置文件
     profile_data = {}
-    with open("profile.yaml" ,"r" ,encoding="utf-8") as f:
+    with open("/mnt/c/Users/86186/Desktop/USBFlow_Soer/profile.yaml" ,"r" ,encoding="utf-8") as f:
         profile_data = f.read()
         profile_data = yaml.safe_load(profile_data)
 
@@ -475,8 +547,8 @@ def main():
     # 获取记录的所有公司的ID号
     Company_List = profile_data["Company_List"][0]
 
-    # 判断目的IP是否是Unknown类型的数据,并且解密
-    Unknown_Type_Device.Check_Unknown_And_Recover(DesID_List ,profile_data ,Field_Value)
+    # 判断目的IP是否是Unknown类型的数据,并且解密;
+    Unknown_Type_Device.Check_Unknown_And_Recover(DesID_List ,profile_data ,Field_Value ,ip ,file ,Company_List)
 
     # 处理目的IP的数据
     if DesID_List[0] in Company_List:
@@ -490,9 +562,9 @@ def main():
     
     # 处理默认值
     else:
-        if len(Field_Value[0]) == 8:
+        if len(Field_Value[0].strip("\n")) == 8:
             MOUSE.Value_2_plt(Field_Value)
-        else:
+        elif len(Field_Value[0].strip("\n")) == 16:
             KEYBOARD.Value_2_PlainText(Field_Value)  
 
     # 询问是否需要爆破所有的值
@@ -501,26 +573,9 @@ def main():
         END.Message()
         exit(-1)
     
-    # 这一段是爆破所有的数据,也不是都能爆破出来,只是给做题的时候提供一点线索(如果有的话)
-    for i in range(len(ID_List)):
-        # 排除输入的IP
-        if ID_List[i] == DesID_List:
-            continue
-        # 获取记录过的设备的数据
-        if ID_List[i][0] in Company_List:
-            class_name = Company_List[ID_List[i][0]]
-            Device_List = profile_data[class_name][1:]
-            Def_Name = Get_defname(ID_List[i][1] ,Device_List)
-            # 将获取的函数名和类名实例化并且执行
-            operator.methodcaller(Def_Name ,Field_Value)(globals()[class_name])
-        # 处理默认值
-        elif len(Field_Value[0]) == 8 or len(Field_Value[0]) == 16:
-            if len(Field_Value[0]) == 8:
-                MOUSE.Value_2_plt(Field_Value)
-            else:
-                KEYBOARD.Value_2_PlainText(Field_Value)   
-        else:
-            print(f"[-] {ID_List[i]}解密失败\n" ,"-"*50)   
+    # 接下来的所有代码就是爆破所有的数据,也不是都能爆破出来,只是给做题的时候提供一点线索(如果有的话)
+    Burteforce(file ,ip ,profile_data ,Company_List)
+            
     END.Message()
 
 if __name__ == "__main__":
