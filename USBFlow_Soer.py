@@ -575,7 +575,8 @@ def main():
     
     # 接下来的所有代码就是爆破所有的数据,也不是都能爆破出来,只是给做题的时候提供一点线索(如果有的话)
     Burteforce(file ,ip ,profile_data ,Company_List)
-            
+    os.remove("temp_dataType.out");os.remove("temp_ALLIP.out")
+    
     END.Message()
 
 if __name__ == "__main__":
