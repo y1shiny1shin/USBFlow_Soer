@@ -106,9 +106,7 @@ class KEYBOARD:
             i = i.strip("\n")
             single_press = i[4:6]
             Function_press_bit = str(bin(int(i[0:2] ,16))[2:].zfill(8)[::-1])
-            # Function_press_dir["[Alt]"]=0
-            # Function_press_dir["[Win]"]=0
-            # Function_press_dir["[Ctrl]"]=0
+
             Function_press_dir = {"[Ctrl]":0 ,"[Shift]":0 ,"[Alt]":0 ,"[Win]":0}
             # 计算功能键的按下情况
             if Function_press_bit[0] != "0" or Function_press_bit[4] != "0":
@@ -142,7 +140,7 @@ class KEYBOARD:
             
             # 输出按下的键位
             CAP_Judge = (CAP_Count + Function_press_dir["[Shift]"])%2
-            
+
             if Function_press_dir["[Shift]"] == 0:
                 if CAP_Judge == 0:
                     print(normal_Keys[single_press].lower() ,end="")
