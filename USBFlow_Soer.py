@@ -100,13 +100,17 @@ class KEYBOARD:
         CAP_Count = 0 # 默认开始是小写
         result = ""
 
+        Func_Choice = input('需要输出所有的功能键吗?[y/n]:').upper()
+
         for i in data_list:
             i = i.strip("\n")
             single_press = i[4:6]
-            Function_press_bit = str(bin(int(i[0:2]))[2:].zfill(8)[::-1])
-            
-            # 计算功能键的按下情况
+            Function_press_bit = str(bin(int(i[0:2] ,16))[2:].zfill(8)[::-1])
+            # Function_press_dir["[Alt]"]=0
+            # Function_press_dir["[Win]"]=0
+            # Function_press_dir["[Ctrl]"]=0
             Function_press_dir = {"[Ctrl]":0 ,"[Shift]":0 ,"[Alt]":0 ,"[Win]":0}
+            # 计算功能键的按下情况
             if Function_press_bit[0] != "0" or Function_press_bit[4] != "0":
                 Function_press_dir["[Ctrl]"] = 1
             if Function_press_bit[1] != "0" or Function_press_bit[5] != "0":
@@ -117,7 +121,7 @@ class KEYBOARD:
                 Function_press_dir["[Win]"] = 1
 
             # 判断是否为有效press
-            if single_press not in normal_Keys or single_press not in shift_Keys:
+            if (single_press not in normal_Keys) or (single_press not in shift_Keys):
                 continue
 
             # 排除重复press
@@ -130,17 +134,27 @@ class KEYBOARD:
                 continue
 
             # 输出功能键组合
-            if 1 in Function_press_dir.values() and (Function_press_dir["[Alt]"] == 1 or Function_press_dir["[Ctrl]"] == 1 or Function_press_dir["[Win]"] == 1):
-                for Func_tuple in Function_press_dir.items():
-                    if Func_tuple[1] == 1:
-                        print(f"{Func_tuple[0]} {shift_Keys[single_press]}")
-
+            if Func_Choice == "Y":
+                if 1 in Function_press_dir.values() and (Function_press_dir["[Alt]"] == 1 or Function_press_dir["[Ctrl]"] == 1 or Function_press_dir["[Win]"] == 1):
+                    for Func_tuple in Function_press_dir.items():
+                        if Func_tuple[1] == 1:
+                            print(f"{Func_tuple[0]} {shift_Keys[single_press]}")
+            
             # 输出按下的键位
             CAP_Judge = (CAP_Count + Function_press_dir["[Shift]"])%2
-            if CAP_Judge == 0:
-                print(normal_Keys[single_press] ,end="")
-            elif CAP_Judge == 1:
-                print(shift_Keys[single_press] ,end="")
+            
+            if Function_press_dir["[Shift]"] == 0:
+                if CAP_Judge == 0:
+                    print(normal_Keys[single_press].lower() ,end="")
+                elif CAP_Judge == 1:
+                    print(normal_Keys[single_press].upper() ,end="")
+            else:
+                if CAP_Judge == 0:
+                    print(shift_Keys[single_press].lower() ,end="")
+                elif CAP_Judge == 1:
+                    print(shift_Keys[single_press].upper() ,end="")
+
+        print("\n" ,"-"*50)
 
 class MOUSE:
     '''
@@ -575,8 +589,8 @@ def main():
     
     # 接下来的所有代码就是爆破所有的数据,也不是都能爆破出来,只是给做题的时候提供一点线索(如果有的话)
     Burteforce(file ,ip ,profile_data ,Company_List)
-    os.remove("temp_dataType.out");os.remove("temp_ALLIP.out")
     
+    os.remove("temp_ALLIP.out");os.remove("temp_dataType.out")
     END.Message()
 
 if __name__ == "__main__":
