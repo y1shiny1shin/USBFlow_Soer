@@ -15,4 +15,5 @@ Usage : python3 USBFlow_Soer.py -f filename -p usb.src -d [usbhid.data/usb.capda
 
   更新日志2:修复若干bug，如果想要在windows下使用，只需要想办法在windows下执行tshark命令即可，再将main()函数的第一个判断语句删掉即可
 
+  更新日志3:借鉴了knm的鼠标的显示模式，分成左右中总四块分别显示
 
