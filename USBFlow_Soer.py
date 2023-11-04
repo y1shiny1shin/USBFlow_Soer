@@ -140,7 +140,8 @@ class KEYBOARD:
             
             # 输出按下的键位
             CAP_Judge = (CAP_Count + Function_press_dir["[Shift]"])%2
-
+            
+            # 看了网上的那些键盘的，还是只有upper lower最好用
             if Function_press_dir["[Shift]"] == 0:
                 if CAP_Judge == 0:
                     print(normal_Keys[single_press].lower() ,end="")
@@ -167,55 +168,64 @@ class MOUSE:
     '''
     # 将鼠标轨迹画出来
     def Value_2_plt(data_list):
-        x_dir ,y_dir = [] ,[]
-        x_pos ,y_pos = 0 ,0
-        x_list ,y_list = [] ,[]
-
+        # 本来这里是想用一个文件来存数据的，但是临时文件太多了，就用变量来存了，运行速度也大差不差
+        Left_x_dir ,Left_y_dir = [] ,[]
+        Right_x_dir ,Right_y_dir = [] ,[]
+        Mid_x_dir ,Mid_y_dir = [] ,[]
+        All_x_dir ,All_y_dir = [] ,[]
+        pos_x ,pos_y = 0 ,0
+        offset_x ,offset_y = 0 ,0
         for i in data_list:
-            i = i.strip("\n")
-            x_offset = int(i[2:4] ,16)
-            y_offset = int(i[4:6] ,16)
-            if x_offset > 127:
-                x_offset -= 256
-            if y_offset > 127:
-                y_offset -= 256
-            x_pos += x_offset
-            y_pos += y_offset
+            press_state = bin(int(i[0:2] ,16))[2:].zfill(8)[::-1]
+            offset_x = int(i[2:4] ,16)
+            offset_y = int(i[4:6] ,16)
+            if offset_x > 127:
+                offset_x -= 256
+            if offset_y > 127:
+                offset_y -= 256
+            pos_x += offset_x
+            pos_y += offset_y
             
-            x_dir.append((x_pos ,i[0:2]))
-            y_dir.append((-y_pos ,i[0:2]))
-        
-        clear_option = str(input("需要清除多余的数据吗?[Y/N]:")).upper()
-        press_option = str(input("需要输出鼠标按键二进制码吗?[y/N](slow):")).upper()
-        if press_option == "Y" or press_option == "\n":
-            MOUSE.Get_Mouse_press(data_list)
-        # 清理多余数据，如果数据头是一样的，则忽略
-        if clear_option == "Y" or clear_option == "\n":
-            cleared_x_list ,cleared_y_list = [] ,[]
-            for i in x_dir:
-                if i[1] != "00":
-                    cleared_x_list.append(i[0])
-                elif i[1] == "00":
-                    continue
-            for i in y_dir:
-                if i[1] != "00":
-                    cleared_y_list.append(i[0])
-                elif i[1] == "00":
-                    continue
-            # 输出结果
-            plt.title("NORMAL_MOUSE")
-            plt.scatter(x=cleared_x_list ,y=cleared_y_list)
-            plt.show()
-        else:
-            x_list ,y_list = [] ,[]
-            for i in x_dir:
-                x_list.append(i[0])
-            for i in y_dir:
-                y_list.append(i[0])
-            plt.title("NORMAL_MOUSE")
-            plt.scatter(x=x_list ,y=y_list)
-            plt.show()
+            # 这段是用来记录所有的按键情况的痕迹
+            if press_state[0] == "1":
+                Left_x_dir.append(pos_x)
+                Left_y_dir.append(-pos_y)
+            if press_state[1] == "1":
+                Right_x_dir.append(pos_x)
+                Right_y_dir.append(-pos_y)
+            if press_state[2] == "1":
+                Mid_x_dir.append(pos_x)
+                Mid_y_dir.append(-pos_y)
+            All_x_dir.append(pos_x)
+            All_y_dir.append(-pos_y)
 
+        '''
+        这一段子图借鉴了 FzWjScJ 神的knm 项目地址
+        https://github.com/FzWjScJ/knm
+        '''
+        fig ,axs = plt.subplots(2 ,2)
+        
+        '''可以根据自己电脑的尺寸修改显示的尺寸'''
+        fig.set_figwidth(12)
+        fig.set_figheight(10)
+        ax1 ,ax2 ,ax3 ,ax4 = axs[0 ,0] ,axs[0 ,1] ,axs[1 ,0] ,axs[1 ,1]
+        
+        # 这里尝试过很多让代码看起来简洁的方案，都失败了
+        ax1.scatter(All_x_dir ,All_y_dir ,color="hotpink")
+        ax1.set_title("ALL")
+        ax2.scatter(Right_x_dir ,Right_y_dir ,color="hotpink")
+        ax2.set_title("RIGHT")
+        ax3.scatter(Left_x_dir ,Left_y_dir ,color="hotpink")
+        ax3.set_title("LEFT")
+        ax4.scatter(Mid_x_dir ,Mid_y_dir ,color="hotpink")
+        ax4.set_title("MID")
+        
+        plt.show()            
+
+        Get_press_choice = input("需要输出鼠标按键二进制码吗?[y/N](slow):").upper()
+        if Get_press_choice == "Y" or Get_press_choice == "\n":
+            Get_press_choice(data_list)
+        
     # 获取鼠标三个按键的二进制，这一段写的很臭，用处估计也不大
     def Get_Mouse_press(data_list):
         Mouse_left_press = ""
@@ -280,7 +290,7 @@ class WACOM:
                 y_pos = int(i[8:10] ,16) + int(i[10:12] ,16)*256
                 x_list.append(x_pos)
                 y_list.append(-y_pos)
-        plt.scatter(x=x_list ,y=y_list)
+        plt.scatter(x=x_list ,y=y_list ,c='hotpink')
         plt.title("CTL 480")
         plt.show()
 
@@ -302,7 +312,7 @@ class WACOM:
                 y_pos = int(i[10:12] ,16) + int(i[12:14] ,16)*256
                 x_list.append(x_pos)
                 y_list.append(-y_pos)
-        plt.scatter(x=x_list ,y=y_list)
+        plt.scatter(x=x_list ,y=y_list ,c='hotpink')
         plt.title("PTH 660")
         plt.show()
 
@@ -431,7 +441,7 @@ class Unknown_Type_Device:
         if DesID_List[0] in profile_data["Unknown"]:
             Def_Name = profile_data["Unknown"][DesID_List[0]]["Device_DefName"]
             operator.methodcaller(Def_Name ,Field_Value)(Unknown_Type_Device)
-
+            print(1)
             # 询问是否需要爆破所有的值
             Brute_Choice = input("需要爆破所有的数据吗?[y/N](也许会不准确or是报错):").upper()
             if Brute_Choice != "Y":
@@ -459,7 +469,7 @@ class Unknown_Type_Device:
             if data[2:4] == "c1":
                 xlist.append(xpos)
                 ylist.append(-ypos)
-        plt.scatter(xlist ,ylist)
+        plt.scatter(xlist ,ylist ,c='hotpink')
         plt.show()
         
     def Mouse_Like_1(Field_Value):
@@ -475,8 +485,20 @@ class Unknown_Type_Device:
             Changed_Value.append(i)
         MOUSE.Value_2_plt(Changed_Value)
 
-    def KeyBoard_Like_1():
-        ...
+    def KeyBoard_Like_1(Field_Value):
+        '''
+        原题:0xGAME2023 notverybadusb 
+        这个是 Arduino 的键盘流量，去掉前两位标识符就是正常的键盘流量
+        因为可能会不太常见，所以就把它丢到Unknown了，没有专门写一个类
+        0200001a0000000000  
+        [0:2] 标识符  [2:4] 功能键  [6:8] 按键
+        '''
+        print(1)
+        changed_list = []
+        for i in Field_Value:
+            i = f"{i[2:4]}00{i[6:8]}0000000000"
+            changed_list.append(i)
+        KEYBOARD.Value_2_PlainText(changed_list)
 
 def Get_defname(Device_ID:str ,Device_List:list) -> str:
     # 返回查找到对应公司下的产品对应的解密函数名
@@ -537,12 +559,12 @@ def Burteforce(file ,ip ,profile_data ,Company_List):
 def main():
     # 检查系统是否是linux系统
     if platform.system() != "Linux":
-        print(f"[-] 您当前的操作系统{platform.system()},本工具只适用于Linux系统!")
+        print(f"[-] 您当前的操作系统{platform.system()},本工具只适用于Linux系统!\n[=] PS:将tshark命令添加到环境变量,再注释main()函数第一个判断语句就可以在windows使用了^^")
         exit(-1)
     
     # 读取配置文件
     profile_data = {}
-    with open("/mnt/c/Users/86186/Desktop/USBFlow_Soer/profile.yaml" ,"r" ,encoding="utf-8") as f:
+    with open("./profile.yaml" ,"r" ,encoding="utf-8") as f:
         profile_data = f.read()
         profile_data = yaml.safe_load(profile_data)
 
