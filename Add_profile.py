@@ -107,6 +107,12 @@ Unknown:
       Device_Type: "Mouse Like"
       Device_DefName: "Mouse_Like_1"
 
+    "0x2341": 
+      Company_ID: "0x2341"
+      Device_ID: "0x8036"
+      Device_Type: "Keyboard Like"
+      Device_DefName: "KeyBoard_Like_1"
+
 Default:
   - type: "Mouse"
     datalen: 8
@@ -116,5 +122,6 @@ Default:
     name: "Default KeyBoard"
 '''
 dict_var = yaml.safe_load(des_dir)
-with open("profile.yaml" ,"w" ,encoding="utf-8") as f:
+with open("./profile.yaml" ,"w" ,encoding="utf-8") as f:
     yaml.dump(dict_var ,f ,default_flow_style=False)
+print("OK")
