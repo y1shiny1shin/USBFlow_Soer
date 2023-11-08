@@ -141,7 +141,6 @@ class KEYBOARD:
             # 输出按下的键位
             CAP_Judge = (CAP_Count + Function_press_dir["[Shift]"])%2
             
-            # 看了网上的那些键盘的，还是只有upper lower最好用
             if Function_press_dir["[Shift]"] == 0:
                 if CAP_Judge == 0:
                     print(normal_Keys[single_press].lower() ,end="")
@@ -168,7 +167,7 @@ class MOUSE:
     '''
     # 将鼠标轨迹画出来
     def Value_2_plt(data_list):
-        # 本来这里是想用一个文件来存数据的，但是临时文件太多了，就用变量来存了，运行速度也大差不差
+        # 本来是想用一个文件来存数据的，但是临时文件太多了，就用变量来存了，运行速度也大差不差
         Left_x_dir ,Left_y_dir = [] ,[]
         Right_x_dir ,Right_y_dir = [] ,[]
         Mid_x_dir ,Mid_y_dir = [] ,[]
@@ -210,7 +209,6 @@ class MOUSE:
         fig.set_figheight(10)
         ax1 ,ax2 ,ax3 ,ax4 = axs[0 ,0] ,axs[0 ,1] ,axs[1 ,0] ,axs[1 ,1]
         
-        # 这里尝试过很多让代码看起来简洁的方案，都失败了
         ax1.scatter(All_x_dir ,All_y_dir ,color="hotpink")
         ax1.set_title("ALL")
         ax2.scatter(Right_x_dir ,Right_y_dir ,color="hotpink")
@@ -223,9 +221,10 @@ class MOUSE:
         plt.show()            
 
         Get_press_choice = input("需要输出鼠标按键二进制码吗?[y/N](slow):").upper()
-        if Get_press_choice == "Y" or Get_press_choice == "\n":
-            Get_press_choice(data_list)
-        
+        if Get_press_choice == "Y":
+            MOUSE.Get_Mouse_press(data_list)
+            print("1")
+
     # 获取鼠标三个按键的二进制，这一段写的很臭，用处估计也不大
     def Get_Mouse_press(data_list):
         Mouse_left_press = ""
@@ -417,6 +416,19 @@ class Razer:
             changed_list.append(i)
         MOUSE.Value_2_plt(changed_list)
 
+    def Razer_UnkownType_Mouse(data_list):
+        '''
+        型号:Unknown (0x0098)
+        数据结构(usbhid.data):0101f8000100f8ff
+        [0:2] press  [2:4] x位移  [4:6] y位移
+        '''
+        print("[+] Razer UnknownType Mouse (0x0098)")
+        changed_list = []
+        for i in data_list:
+            i = f"{i[0:2]}{i[2:4]}{i[4:6]}{i[6:8]}"
+            changed_list.append(i)
+        MOUSE.Value_2_plt(changed_list)
+
 class Apple:
     # Apple, Inc.(0x05ac)
     def ANSI(data_list):
@@ -564,8 +576,8 @@ def main():
     
     # 读取配置文件
     profile_data = {}
-    # 如果这里报错，需要将profile路径，修改成绝对路径
-    with open("./profile.yaml" ,"r" ,encoding="utf-8") as f: 
+    # 需要将这里改为绝对路径
+    with open("/mnt/c/Users/86186/Desktop/USBFlow_Soer_123/profile.yaml" ,"r" ,encoding="utf-8") as f:
         profile_data = f.read()
         profile_data = yaml.safe_load(profile_data)
 
