@@ -85,6 +85,16 @@ Razer:
     Device_Type: "Mouse"
     Device_DefName: "Basilisk_Mouse"
 
+  - Device_ID: "0x004f"
+    Device_Name: "RZ01-0145, Gaming Mouse [DeathAdder 2000 (Alternate)]"
+    Device_Type: "Mouse"
+    Device_DefName: "DeathAdder_Mouse"
+
+  - Device_ID: "0x0098"
+    Device_Name: "Razer UnknownType Mouse"
+    Device_Type: "Mouse"
+    Device_DefName: "Razer_UnkownType_Mouse"
+
 Apple:
   - Company_ID: "0x05ac"
     Company_name: "Apple, Inc."
