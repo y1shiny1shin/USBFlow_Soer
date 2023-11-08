@@ -564,7 +564,8 @@ def main():
     
     # 读取配置文件
     profile_data = {}
-    with open("./profile.yaml" ,"r" ,encoding="utf-8") as f:
+    # 如果这里报错，需要将profile路径，修改成绝对路径
+    with open("./profile.yaml" ,"r" ,encoding="utf-8") as f: 
         profile_data = f.read()
         profile_data = yaml.safe_load(profile_data)
 
