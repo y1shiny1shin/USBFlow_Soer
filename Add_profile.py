@@ -62,6 +62,11 @@ LOG:
     Device_Type: "Mouse"
     Device_DefName: "G102_Wire"
 
+  - Device_ID: "0xc05a"
+    Device_Name: "M90/M100 Optical Mouse"
+    Device_Type: "Mouse"
+    Device_DefName: "M90_M100_Mouse"
+
 WACOM:
   - Company_ID: "0x056a"
     Company_name: "Wacom Co., Ltd"
