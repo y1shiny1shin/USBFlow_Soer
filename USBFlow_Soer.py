@@ -386,6 +386,15 @@ class LOG:
             i = f"{i[0:2]}{i[4:6]}{i[8:10]}00"
             changed_list.append(i)
         MOUSE.Value_2_plt(changed_list)
+    
+    def M90_M100_Mouse(data_list):
+        '''
+        型号: M90/M100 Optical Mouse
+        数据结构(usbhid.data):01fefc00
+        和普通鼠标是一样的
+        '''
+        print("[+] M90/M100 Optical Mouse(0xc05a)")
+        MOUSE.Value_2_plt(data_list)
 
 class Razer:
     # Razer USA, Ltd (0x1532)
@@ -577,7 +586,7 @@ def main():
     # 读取配置文件
     profile_data = {}
     # 需要将这里改为绝对路径
-    with open("/mnt/c/Users/86186/Desktop/USBFlow_Soer_123/profile.yaml" ,"r" ,encoding="utf-8") as f:
+    with open("/mnt/c/Users/86186/Desktop/USBFlow_Soer/profile.yaml" ,"r" ,encoding="utf-8") as f:
         profile_data = f.read()
         profile_data = yaml.safe_load(profile_data)
 
@@ -604,6 +613,9 @@ def main():
         # 获取配置文件中的函数名
         Device_List = profile_data[class_name][1:]
         Def_Name = Get_defname(DesID_List[1] ,Device_List)
+        if Def_Name == None:
+            print("[-] 该产品尚未记录在工具中,请练习作者增添该工具")
+            exit(-1)
         # 将获取的函数名和类名实例化并且执行
         operator.methodcaller(Def_Name ,Field_Value)(globals()[class_name])
     
