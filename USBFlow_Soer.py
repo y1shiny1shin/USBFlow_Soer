@@ -396,6 +396,18 @@ class LOG:
         print("[+] M90/M100 Optical Mouse(0xc05a)")
         MOUSE.Value_2_plt(data_list)
 
+    def G402_Gaming_Mouse(data_list):
+        '''
+        型号: G402 Gaming Mouse (0xc07e)
+        数据结构(usbhid.data):0100010001000000
+        [0:2] press   [4:6]  x位移   [8:10]  y位移
+        '''
+        changed_list = []
+        for i in data_list:
+            i = f"{i[0:2]}{i[4:6]}{i[8:10]}00"
+            changed_list.append(i)
+        MOUSE.Value_2_plt(changed_list)
+
 class Razer:
     # Razer USA, Ltd (0x1532)
 
@@ -585,8 +597,8 @@ def main():
     
     # 读取配置文件
     profile_data = {}
-    # 需要将这里改为绝对路径
-    with open("/mnt/c/Users/86186/Desktop/USBFlow_Soer/profile.yaml" ,"r" ,encoding="utf-8") as f:
+
+    with open(f"{os.path.split(os.path.realpath(__file__))[0]}/profile.yaml" ,"r" ,encoding="utf-8") as f:
         profile_data = f.read()
         profile_data = yaml.safe_load(profile_data)
 
