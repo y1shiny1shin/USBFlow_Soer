@@ -37,6 +37,11 @@ LOG:
     Device_Type: "Mouse"
     Device_DefName: "LOG_Lightspeed_Reveiver"
 
+  - Device_ID: "0xc07e"
+    Device_Name: "G402 Gaming Mouse"
+    Device_Type: "Mouse"
+    Device_DefName: "G402_Gaming_Mouse"
+
   - Device_ID: "0xc08b"
     Device_Name: "Logitech G502 SE HERO Gaming Mouse"
     Device_Type: "Mouse"
