@@ -17,3 +17,7 @@ Usage : python3 USBFlow_Soer.py -f filename -p usb.src -d [usbhid.data/usb.capda
 
   更新日志3:借鉴了knm的鼠标的显示模式，分成左右中总四块分别显示
 
+Q&A:
+  Q1.为什么没有什么数据都没有提出来？
+    A: 检查tshark版本，4.0以上为好 `sudo apt-get update|sudo apt-get install tshark` 
+        检查`profile.yaml`存在没
