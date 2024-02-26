@@ -1,0 +1,96 @@
+Apple:
+- Company_ID: '0x05ac'
+  Company_name: Apple, Inc.
+- Device_DefName: ANSI
+  Device_ID: '0x024f'
+  Device_Name: Aluminium Keyboard (ANSI)
+  Device_Type: KeyBoard
+Company_List:
+- '0x046d': LOG
+  '0x056a': WACOM
+  '0x05ac': Apple
+  '0x1532': Razer
+Default:
+- datalen: 8
+  name: Default Mouse
+  type: Mouse
+- datalen: 16
+  name: Default KeyBoard
+  type: KeyBoard
+LOG:
+- Company_ID: '0x046d'
+  Company_name: Logitech, Inc.
+- Device_DefName: LOG_Lightspeed_Reveiver
+  Device_ID: '0xc539'
+  Device_Name: Lightspeed Receiver
+  Device_Type: Mouse
+- Device_DefName: G402_Gaming_Mouse
+  Device_ID: '0xc07e'
+  Device_Name: G402 Gaming Mouse
+  Device_Type: Mouse
+- Device_DefName: LOG_G502_MOUSE
+  Device_ID: '0xc08b'
+  Device_Name: Logitech G502 SE HERO Gaming Mouse
+  Device_Type: Mouse
+- Device_DefName: Mouse
+  Device_ID: '0xc077'
+  Device_Name: Logitech Mouse
+  Device_Type: Mouse
+- Device_DefName: Unknown_keyboard
+  Device_ID: '0xc341'
+  Device_Name: Logitech Unknow Keyboard Type
+  Device_Type: KeyBoard
+- Device_DefName: G304_Wireless
+  Device_ID: '0xc53f'
+  Device_Name: G304 Wireless
+  Device_Type: Mouse
+- Device_DefName: G102_Wire
+  Device_ID: '0xc09d'
+  Device_Name: G102 Wire
+  Device_Type: Mouse
+- Device_DefName: M90_M100_Mouse
+  Device_ID: '0xc05a'
+  Device_Name: M90/M100 Optical Mouse
+  Device_Type: Mouse
+Razer:
+- Company_ID: '0x1532'
+  Company_name: Razer USA, Ltd
+- Device_DefName: Basilisk_Mouse
+  Device_ID: '0x0083'
+  Device_Name: RC30-0315, Gaming Mouse [Basilisk x HyperSpeed]
+  Device_Type: Mouse
+- Device_DefName: DeathAdder_Mouse
+  Device_ID: '0x004f'
+  Device_Name: RZ01-0145, Gaming Mouse [DeathAdder 2000 (Alternate)]
+  Device_Type: Mouse
+- Device_DefName: Razer_UnkownType_Mouse
+  Device_ID: '0x0098'
+  Device_Name: Razer UnknownType Mouse
+  Device_Type: Mouse
+Unknown:
+  '0x093a':
+    Company_ID: '0x093a'
+    Device_DefName: Mouse_Like_1
+    Device_ID: '0x2530'
+    Device_Type: Mouse Like
+  '0x2341':
+    Company_ID: '0x2341'
+    Device_DefName: KeyBoard_Like_1
+    Device_ID: '0x8036'
+    Device_Type: Keyboard Like
+  '0x256c':
+    Company_ID: '0x26c'
+    Device_DefName: Wacom_Like_1
+    Device_ID: '0x006d'
+    Device_Type: Wacom Like
+WACOM:
+- Company_ID: '0x056a'
+  Company_name: Wacom Co., Ltd
+- Device_DefName: CTL_480
+  Device_ID: '0x030e'
+  Device_Name: CTL-480 [Intuos Pen (S)]
+  Device_Type: wacom
+- Device_DefName: PTH_660
+  Device_ID: '0x0357'
+  Device_Name: PTH-660 [Intuos Pro (M)]
+  Device_Type: wacom
