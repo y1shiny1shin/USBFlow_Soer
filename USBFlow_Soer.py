@@ -469,7 +469,7 @@ class Razer:
             i = f"{i[0:2]}{i[8:10]}{i[12:14]}00"
             changed_list.append(i)
         MOUSE.Value_2_plt(changed_list)
-        
+
 class Apple:
     # Apple, Inc.(0x05ac)
     def ANSI(data_list):
@@ -719,3 +719,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    print('[=] git配置测试')
