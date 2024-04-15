@@ -28,6 +28,8 @@ Company_List:
     "0x056a": "WACOM"
     "0x1532": "Razer"
     "0x05ac": "Apple"
+    "0x18f8": "Maxxter"
+    "0x248a": "Maxxter"
 LOG:
   - Company_ID: "0x046d"
     Company_name: "Logitech, Inc."
@@ -72,6 +74,25 @@ LOG:
     Device_Type: "Mouse"
     Device_DefName: "M90_M100_Mouse"
 
+  - Device_ID: "0xc092"
+    Device_Name: "G102/G203 LIGHTSYNC Gaming Mouse"
+    Device_Type: "Mouse"
+    Device_DefName: "G402_Gaming_Mouse"
+
+Maxxter:
+  - Company_ID: "0x18f8"
+    Company_name: "Maxxter"
+
+  - Device_ID: "0x0f97"
+    Device_Name: "Optical Gaming Mouse [Xtrem]"
+    Device_Type: "Mouse"
+    Device_DefName: "Maxxter_OpticalGaming_Mouse"
+
+  - Device_ID: "0x8366"
+    Device_Name: "Wireless Optical Mouse ACT-MUSW-002"
+    Device_Type: "Mouse"
+    Device_DefName: "Wireless_Optical_Mouse_ACT"
+
 WACOM:
   - Company_ID: "0x056a"
     Company_name: "Wacom Co., Ltd"
@@ -114,6 +135,12 @@ Apple:
     Device_Type: "KeyBoard"
     Device_DefName: "ANSI"
 
+HP:
+  - Company_ID: "0x03f0"
+    Company_name: "HP, Inc"
+
+
+
 Unknown:
     "0x256c": 
       Company_ID: "0x256c"
@@ -144,4 +171,4 @@ Default:
 dict_var = yaml.safe_load(des_dir)
 with open("./profile.yaml" ,"w" ,encoding="utf-8") as f:
     yaml.dump(dict_var ,f ,default_flow_style=False)
-print("OK")
+print("[+] 更新profile.yaml成功")
