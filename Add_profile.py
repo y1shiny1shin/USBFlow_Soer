@@ -126,6 +126,11 @@ Razer:
     Device_Type: "Mouse"
     Device_DefName: "Razer_UnkownType_Mouse"
 
+  - Device_ID: "0x0094"
+    Device_Name: "Razer UnknownType Mouse 2"
+    Device_Type: "Mouse"
+    Device_DefName: "Razer_UnkownType_Mouse2"
+
 Apple:
   - Company_ID: "0x05ac"
     Company_name: "Apple, Inc."

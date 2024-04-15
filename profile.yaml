@@ -87,6 +87,10 @@ Razer:
   Device_ID: '0x0098'
   Device_Name: Razer UnknownType Mouse
   Device_Type: Mouse
+- Device_DefName: Razer_UnkownType_Mouse2
+  Device_ID: '0x0094'
+  Device_Name: Razer UnknownType Mouse 2
+  Device_Type: Mouse
 Unknown:
   '0x093a':
     Company_ID: '0x093a'

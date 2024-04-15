@@ -457,6 +457,19 @@ class Razer:
             changed_list.append(i)
         MOUSE.Value_2_plt(changed_list)
 
+    def Razer_UnkownType_Mouse2(data_list):
+        '''
+        型号:Unknown (0x0098)
+        数据结构(usbhid.data):00000000feff0100
+        [0:2] press  [8:10] x位移  [12:14] y位移
+        '''
+        print("[+] Razer UnknownType Mouse 2 (0x0094)")
+        changed_list = []
+        for i in data_list:
+            i = f"{i[0:2]}{i[8:10]}{i[12:14]}00"
+            changed_list.append(i)
+        MOUSE.Value_2_plt(changed_list)
+        
 class Apple:
     # Apple, Inc.(0x05ac)
     def ANSI(data_list):
@@ -706,5 +719,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    print("[=] test git")
