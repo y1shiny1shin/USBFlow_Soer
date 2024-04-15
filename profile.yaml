@@ -10,6 +10,8 @@ Company_List:
   '0x056a': WACOM
   '0x05ac': Apple
   '0x1532': Razer
+  '0x18f8': Maxxter
+  '0x248a': Maxxter
 Default:
 - datalen: 8
   name: Default Mouse
@@ -17,6 +19,9 @@ Default:
 - datalen: 16
   name: Default KeyBoard
   type: KeyBoard
+HP:
+- Company_ID: '0x03f0'
+  Company_name: HP, Inc
 LOG:
 - Company_ID: '0x046d'
   Company_name: Logitech, Inc.
@@ -52,6 +57,21 @@ LOG:
   Device_ID: '0xc05a'
   Device_Name: M90/M100 Optical Mouse
   Device_Type: Mouse
+- Device_DefName: G402_Gaming_Mouse
+  Device_ID: '0xc092'
+  Device_Name: G102/G203 LIGHTSYNC Gaming Mouse
+  Device_Type: Mouse
+Maxxter:
+- Company_ID: '0x18f8'
+  Company_name: Maxxter
+- Device_DefName: Maxxter_OpticalGaming_Mouse
+  Device_ID: '0x0f97'
+  Device_Name: Optical Gaming Mouse [Xtrem]
+  Device_Type: Mouse
+- Device_DefName: Wireless_Optical_Mouse_ACT
+  Device_ID: '0x8366'
+  Device_Name: Wireless Optical Mouse ACT-MUSW-002
+  Device_Type: Mouse
 Razer:
 - Company_ID: '0x1532'
   Company_name: Razer USA, Ltd
@@ -79,7 +99,7 @@ Unknown:
     Device_ID: '0x8036'
     Device_Type: Keyboard Like
   '0x256c':
-    Company_ID: '0x26c'
+    Company_ID: '0x256c'
     Device_DefName: Wacom_Like_1
     Device_ID: '0x006d'
     Device_Type: Wacom Like
