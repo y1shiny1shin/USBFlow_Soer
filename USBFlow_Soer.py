@@ -398,7 +398,7 @@ class LOG:
 
     def G402_Gaming_Mouse(data_list):
         '''
-        型号: G402 Gaming Mouse (0xc07e)
+        型号: G402 Gaming Mouse (0xc07e)||G102/G203 LIGHTSYNC Gaming Mouse
         数据结构(usbhid.data):0100010001000000
         [0:2] press   [4:6]  x位移   [8:10]  y位移
         '''
@@ -407,6 +407,13 @@ class LOG:
             i = f"{i[0:2]}{i[4:6]}{i[8:10]}00"
             changed_list.append(i)
         MOUSE.Value_2_plt(changed_list)
+
+    # def G102_G203_Mouse(data_list):
+    #     '''
+    #     型号: 
+    #     数据结构(usbhid.data):0100010001000000
+    #     [0:2] press   [4:6] x位移    [8:10]   y位移
+    #     '''
 
 class Razer:
     # Razer USA, Ltd (0x1532)
@@ -453,16 +460,60 @@ class Razer:
 class Apple:
     # Apple, Inc.(0x05ac)
     def ANSI(data_list):
+        TODO:需要将它改成更合理的数据处理
         '''
         型号:Aluminium Keyboard (ANSI) (0x024f)
         暂且当成普通的键盘来解
         '''
         print("[+] 型号:Apple Aluminium Keyboard (ANSI)(0x024f)\n")
-        normal_Keys = {
-        "04":"a", "05":"b", "06":"c", "07":"d", "08":"e","09":"f", "0a":"g", "0b":"h", "0c":"i", "0d":"j","0e":"k", "0f":"l", "10":"m", "11":"n", "12":"o","13":"p", "14":"q", "15":"r", "16":"s", "17":"t","18":"u", "19":"v", "1a":"w", "1b":"x", "1c":"y","1d":"z","1e":"1", "1f":"2", "20":"3", "21":"4","22":"5", "23":"6","24":"7","25":"8","26":"9","27":"0","28":"\n","29":"<ESC>","2a":"<DEL>", "2b":"\t","2c":" ","2d":"-","2e":"=","2f":"[","30":"]","31":"\\","32":"<NON>","33":";","34":"'","35":"<GA>","36":",","37":".","38":"/","39":"<CAP>","3a":"<F1>","3b":"<F2>", "3c":"<F3>","3d":"<F4>","3e":"<F5>","3f":"<F6>","40":"<F7>","41":"<F8>","42":"<F9>","43":"<F10>","44":"<F11>","45":"<F12>","46":"<PRTSC>","47":"<SCR>","48":"<PAUSE>","49":"<INSERT>","4a":"<HOME>","4b":"<PGUP>","4c":"<DEL FORWARD>","4d":"<END>","4e":"<PGDW>","4f":"<RIGHTARROW>","50":"<LEFTARROW>","51":"<DOWNARROW>","52":"<UPARRWO>","00":"","":""}
+        pad_Keys = {
+        "04":"a", "05":"b", "06":"c", "07":"d", "08":"e","09":"f", "0a":"g", "0b":"h", "0c":"i", "0d":"j","0e":"k", "0f":"l", "10":"m", "11":"n", "12":"o","13":"p", "14":"q", "15":"r", "16":"s", "17":"t","18":"u", "19":"v", "1a":"w", "1b":"x", "1c":"y","1d":"z","1e":"1", "1f":"2", "20":"3", "21":"4","22":"5", "23":"6","24":"7","25":"8","26":"9","27":"0","28":"\n","29":"<ESC>","2a":"<DEL>", "2b":"\t","2c":" ","2d":"-","2e":"=","2f":"[","30":"]","31":"\\","32":"<NON>","33":";","34":"'","35":"<GA>","36":",","37":".","38":"/","39":"<CAP>","3a":"<F1>","3b":"<F2>", "3c":"<F3>","3d":"<F4>","3e":"<F5>","3f":"<F6>","40":"<F7>","41":"<F8>","42":"<F9>","43":"<F10>","44":"<F11>","45":"<F12>","46":"<PRTSC>","47":"<SCR>","48":"<PAUSE>","49":"<INSERT>","4a":"<HOME>","4b":"<PGUP>","4c":"<DEL FORWARD>","4d":"<END>","4e":"<PGDW>","4f":"<RIGHTARROW>","50":"<LEFTARROW>","51":"<DOWNARROW>","52":"<UPARRWO>","53":"<NUMBERLOCK>","54":"1","55":"*","56":"-","57":"+","58":"<ENTER>","59":"<1/END>","5a":"<2/Down>","5b":"<3/PageDn","5c":"<4/LeftArrow>","5d":"5","5e":"<6/RightArrow>","5f":"<7/Home>","60":"<8/UpArrow>","61":"<9/PageUp>","62":"<0/Insert>","63":"<./Delete>","00":"","":""}
         for i in data_list:
-            i = i.strip("\n")
-            print(normal_Keys[i[4:6]] ,end="")
+            try:
+                i = i.strip("\n")
+                print(pad_Keys[i[4:6]] ,end="")
+            except:
+                continue
+        print("\n","-"*50)
+        chioce = input("[+] 只需要留下数字键吗？[Y/N]").upper()
+        print("\n")
+        if chioce == "Y":
+            pad_Keys = {
+        "04":"a", "05":"b", "06":"c", "07":"d", "08":"e","09":"f", "0a":"g", "0b":"h", "0c":"i", "0d":"j","0e":"k", "0f":"l", "10":"m", "11":"n", "12":"o","13":"p", "14":"q", "15":"r", "16":"s", "17":"t","18":"u", "19":"v", "1a":"w", "1b":"x", "1c":"y","1d":"z","1e":"1", "1f":"2", "20":"3", "21":"4","22":"5", "23":"6","24":"7","25":"8","26":"9","27":"0","28":"\n","29":"<ESC>","2a":"<DEL>", "2b":"\t","2c":" ","2d":"-","2e":"=","2f":"[","30":"]","31":"\\","32":"<NON>","33":";","34":"'","35":"<GA>","36":",","37":".","38":"/","39":"<CAP>","3a":"<F1>","3b":"<F2>", "3c":"<F3>","3d":"<F4>","3e":"<F5>","3f":"<F6>","40":"<F7>","41":"<F8>","42":"<F9>","43":"<F10>","44":"<F11>","45":"<F12>","46":"<PRTSC>","47":"<SCR>","48":"<PAUSE>","49":"<INSERT>","4a":"<HOME>","4b":"<PGUP>","4c":"<DEL FORWARD>","4d":"<END>","4e":"<PGDW>","4f":"<RIGHTARROW>","50":"<LEFTARROW>","51":"<DOWNARROW>","52":"<UPARRWO>","53":"<NUMBERLOCK>","54":"1","55":"*","56":"-","57":"+","58":"<ENTER>","59":"1","5a":"2","5b":"3","5c":"4","5d":"5","5e":"6","5f":"7","60":"8","61":"9","62":"0","63":".","00":"","":""}
+            for i in data_list:
+                try:
+                    i = i.strip("\n")
+                    print(pad_Keys[i[4:6]] ,end="")
+                except:
+                    continue
+        print("\n","-"*50)
+
+class Maxxter:
+    def Maxxter_OpticalGaming_Mouse(data_list):
+        '''
+        型号: Optical Gaming Mouse [Xtrem](0x0f97)
+        usbhid.data = 0100f97f0000(6 bytes)
+        [0:2] press  [4:6] x位移  [6:8] y位移
+        '''
+        print("[+] 型号: Maxxter Optical Gaming Mouse [Xtrem](0x0f97)")
+        changed_datalist = []
+        for i in data_list:
+            i = f"{i[0:2]}{i[4:6]}{i[6:8]}00"
+            changed_datalist.append(i)
+        MOUSE.Value_2_plt(changed_datalist)
+
+    def Wireless_Optical_Mouse_ACT(data_list):
+        '''
+        型号: Wireless Optical Mouse ACT-MUSW-002(0x8366)
+        usbhid.data = 0100fbff00(5 bytes)
+        [0:2] press  [4:6] x位移  [6:8] y位移
+        '''
+        print("[+] 型号: Wireless Optical Mouse ACT-MUSW-002(0x8366)")
+        changed_datalist = []
+        for i in data_list:
+            i = f"{i[0:2]}{i[4:6]}{i[6:8]}00"
+            changed_datalist.append(i)
+        MOUSE.Value_2_plt(changed_datalist)
 
 class Unknown_Type_Device:
     '''
@@ -591,9 +642,9 @@ def Burteforce(file ,ip ,profile_data ,Company_List):
 
 def main():
     # 检查系统是否是linux系统
-    if platform.system() != "Linux":
-        print(f"[-] 您当前的操作系统{platform.system()},本工具只适用于Linux系统!\n[=] PS:将tshark命令添加到环境变量,再注释main()函数第一个判断语句就可以在windows使用了^^")
-        exit(-1)
+    # if platform.system() == "Linux" or platform.system() == "Darwin":
+    #     print(f"[-] 您当前的操作系统{platform.system()},本工具只适用于Linux系统!\n[=] PS:将tshark命令添加到环境变量,再注释main()函数第一个判断语句就可以在windows使用了^^")
+    #     exit(-1)
     
     # 读取配置文件
     profile_data = {}
@@ -606,7 +657,7 @@ def main():
     file ,ip ,field = GET_START.Get_Basic_Parameter()
     Field_Value ,ID_List ,DesID_List = GET_START.Build_Cmd_And_Get_Data(file_name=file ,des_IP=ip ,field_name=field)
     print(f"[+] [DEVICE_LIST]: {ID_List}\n[+] 您可以在USB_ID_List.txt中查找具体的设备名称\n" ,"-"*50)
-    
+
     # 如果返回值有问题，报错并且停止程序
     if len(Field_Value) == 0:
         print(f"[-] 源IP为{ip},字段名称为{field}提取出来的数据为空,请检查一下IP和字段是否正确以及对应IP下是否有数据")
@@ -614,6 +665,7 @@ def main():
     
     # 获取记录的所有公司的ID号
     Company_List = profile_data["Company_List"][0]
+    print(Company_List)
 
     # 判断目的IP是否是Unknown类型的数据,并且解密;
     Unknown_Type_Device.Check_Unknown_And_Recover(DesID_List ,profile_data ,Field_Value ,ip ,file ,Company_List)
@@ -647,7 +699,9 @@ def main():
     # 接下来的所有代码就是爆破所有的数据,也不是都能爆破出来,只是给做题的时候提供一点线索(如果有的话)
     Burteforce(file ,ip ,profile_data ,Company_List)
     
-    os.remove("temp_ALLIP.out");os.remove("temp_dataType.out")
+
+    os.remove("temp_dataType.out")
+    os.remove("temp_ALLIP.out")
     END.Message()
 
 if __name__ == "__main__":
