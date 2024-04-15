@@ -1,6 +1,5 @@
 # USBFlow_Soer
 Usage : python3 USBFlow_Soer.py -f filename -p usb.src -d [usbhid.data/usb.capdata]
-注意：运行工具之前，需要在工具目录下运行一次`Add_profile.py`
 
   这个项目的原理是通过USBid的唯一性，来写出特定的数据解析脚本，本质上是穷举的做法，师傅们如果遇到了什么特殊的USB流量或者是对这个项目有什么建议，
   欢迎与我QQ:`2729913542`交流，基本上能做到秒回(づ￣ 3￣)づ。
@@ -17,10 +16,12 @@ Usage : python3 USBFlow_Soer.py -f filename -p usb.src -d [usbhid.data/usb.capda
 
 
 
-Q&A:
-  Q1.为什么没有什么数据都没有提出来？
-    A: 检查tshark版本，4.0以上为好 `sudo apt-get update|sudo apt-get install tshark` 
-        检查`profile.yaml`存在没
+>Q&A:
 
-  Q2.为什么Windows不能用？
-    A: 因为windows下没有tshark，所以需要先安装tshark，因为windows下的tshark是`exe`文件，所以需要手动添加tshark路径，或者是将`tshark.exe`添加到环境变量中
+>  Q1.为什么没有什么数据都没有提出来？
+
+>  A: 检查tshark版本，4.0以上为好 `sudo apt-get update|sudo apt-get install tshark` 
+
+>  Q2.为什么Windows不能用？
+
+>  A: 因为windows下没有tshark，所以需要先安装tshark，因为windows下的tshark是`exe`文件，所以需要手动添加tshark路径，或者是将`tshark.exe`添加到环境变量中
