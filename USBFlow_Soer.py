@@ -6,6 +6,7 @@ import argparse
 import platform
 import matplotlib.pyplot as plt
 import operator
+from collections import Counter
 
 logo = '''
           __         _       _         
@@ -74,7 +75,7 @@ class GET_START:
         else:
             return USB_Value_List ,ID ,(None ,None)
 
-class KEYBOARD:
+class KEYBOARD:# 00010100
     '''
     Leftover Capture Data(usb.capdata): 0200040000000000
     [0:2]->binary:00000010(按下了Left Shift) :
@@ -91,8 +92,11 @@ class KEYBOARD:
     }
     [4:6]:按下的键盘上的键,如果短时间按了两个键,那么[6:8]也会有数据
     '''
+    def __init__(self ,data_list):
+        self.Func_Choice = "Y"
+        self.data_list = data_list
     # 还原键盘的按键情况
-    def Value_2_PlainText(data_list):
+    def Value_2_PlainText(self):
         normal_Keys = {
         "04":"a", "05":"b", "06":"c", "07":"d", "08":"e","09":"f", "0a":"g", "0b":"h", "0c":"i", "0d":"j","0e":"k", "0f":"l", "10":"m", "11":"n", "12":"o","13":"p", "14":"q", "15":"r", "16":"s", "17":"t","18":"u", "19":"v", "1a":"w", "1b":"x", "1c":"y","1d":"z","1e":"1", "1f":"2", "20":"3", "21":"4","22":"5", "23":"6","24":"7","25":"8","26":"9","27":"0","28":"\n","29":"<ESC>","2a":"<DEL>", "2b":"\t","2c":" ","2d":"-","2e":"=","2f":"[","30":"]","31":"\\","32":"<NON>","33":";","34":"'","35":"<GA>","36":",","37":".","38":"/","39":"<CAP>","3a":"<F1>","3b":"<F2>", "3c":"<F3>","3d":"<F4>","3e":"<F5>","3f":"<F6>","40":"<F7>","41":"<F8>","42":"<F9>","43":"<F10>","44":"<F11>","45":"<F12>","46":"<PRTSC>","47":"<SCR>","48":"<PAUSE>","49":"<INSERT>","4a":"<HOME>","4b":"<PGUP>","4c":"<DEL FORWARD>","4d":"<END>","4e":"<PGDW>","4f":"<RIGHTARROW>","50":"<LEFTARROW>","51":"<DOWNARROW>","52":"<UPARRWO>","00":"","":""}
         shift_Keys = {
@@ -100,9 +104,9 @@ class KEYBOARD:
         CAP_Count = 0 # 默认开始是小写
         result = ""
 
-        Func_Choice = input('需要输出所有的功能键吗?[y/n]:').upper()
+        # Func_Choice = input('需要输出所有的功能键吗?[y/n]:').upper()
 
-        for i in data_list:
+        for i in self.data_list:
             i = i.strip("\n")
             single_press = i[4:6]
             Function_press_bit = str(bin(int(i[0:2] ,16))[2:].zfill(8)[::-1])
@@ -132,7 +136,7 @@ class KEYBOARD:
                 continue
 
             # 输出功能键组合
-            if Func_Choice == "Y":
+            if self.Func_Choice == "Y":
                 if 1 in Function_press_dir.values() and (Function_press_dir["[Alt]"] == 1 or Function_press_dir["[Ctrl]"] == 1 or Function_press_dir["[Win]"] == 1):
                     for Func_tuple in Function_press_dir.items():
                         if Func_tuple[1] == 1:
@@ -359,7 +363,8 @@ class LOG:
         数据类型:普通类型
         '''
         print("[+] 型号:Logitech Unknow Keyboard Type(0xc341)\n")
-        KEYBOARD.Value_2_PlainText(data_list)
+        keyborad = KEYBOARD(data_list)
+        keyborad.Value_2_PlainText()
 
     def G304_Wireless(data_list):
         '''
@@ -538,7 +543,6 @@ class Unknown_Type_Device:
         if DesID_List[0] in profile_data["Unknown"]:
             Def_Name = profile_data["Unknown"][DesID_List[0]]["Device_DefName"]
             operator.methodcaller(Def_Name ,Field_Value)(Unknown_Type_Device)
-            print(1)
             # 询问是否需要爆破所有的值
             Brute_Choice = input("需要爆破所有的数据吗?[y/N](也许会不准确or是报错):").upper()
             if Brute_Choice != "Y":
@@ -597,6 +601,20 @@ class Unknown_Type_Device:
             changed_list.append(i)
         KEYBOARD.Value_2_PlainText(changed_list)
 
+class Burte_Force_Class:
+    def Burte_Force_Keyboard(data_list):
+        '''
+        键盘的一般结构： 02000400
+        02 特殊键位，04 按下的键位
+        '''
+        counter = Counter(data_list).most_common(1)[0][0]
+        for data_pos in range(2 ,len(counter) ,2):
+            result = []
+            for data in data_list:
+                result.append(f"{data[0:2]}00{data[data_pos:data_pos+2]}0000000000")
+            KEYBOARD(result).Value_2_PlainText()
+
+        
 def Get_defname(Device_ID:str ,Device_List:list) -> str:
     # 返回查找到对应公司下的产品对应的解密函数名
     for i in Device_List:
@@ -616,42 +634,40 @@ def Burteforce(file ,ip ,profile_data ,Company_List):
     print(f"[+] 有如下{ALL_IP_List}IP可以提取数据")
 
     for Other_ip in ALL_IP_List:
-        # 这一段是在读取此IP的数据类型(usbhid.data/usb.capdata)
+        # TODO 不需要读取类型，直接爆破两个字段，根据输出的文件大小判断出字段
         print("-"*50 ,f"\n[=] 正在提取 {Other_ip} 地址的数据")
         
         Zero_ip = Other_ip[:-1] + "0"
-        os.system(f'tshark -r {file} -T fields -Y "usb.src=={Zero_ip}" -e usb.bInterfaceClass > temp_dataType.out')
-        with open("temp_dataType.out") as f: 
-            dataType = "".join(t for t in [i.strip("\n") for i in list(set(f.readlines()))])
-        if "0x03" in dataType:
-            dataType = "usbhid.data"
-        else:continue # 由于还没发现usb.capdata的数据,所以遇到不是usbhid.data的直接跳过
-        
-        # 这段就是把main函数的一部分给套过来了,因为不会递归(
-        Field_Value ,ID_List ,DesID_List = GET_START.Build_Cmd_And_Get_Data(file_name=file ,des_IP=Other_ip ,field_name=dataType)
+        dataTypes = ["usbhid.data" ,"usb.capdata" ,"btatt.value"]
+        for dataType in dataTypes:
+            try:
+                # 这段就是把main函数的一部分给套过来了,因为不会递归(
+                Field_Value ,ID_List ,DesID_List = GET_START.Build_Cmd_And_Get_Data(file_name=file ,des_IP=Other_ip ,field_name=dataType)
 
-        if len(Field_Value) == 0:
-            print(f"[-] 源IP为{ip},字段名称为{dataType}提取出来的数据为空\n" ,"-"*50)
-            continue
-        Unknown_Type_Device.Check_Unknown_And_Recover(DesID_List ,profile_data ,Field_Value ,Other_ip ,file ,Company_List)
+                if len(Field_Value) == 0:
+                    print(f"[-] 源IP为{ip},字段名称为{dataType}提取出来的数据为空\n" ,"-"*50)
+                    continue
+                Unknown_Type_Device.Check_Unknown_And_Recover(DesID_List ,profile_data ,Field_Value ,Other_ip ,file ,Company_List)
 
-        # 处理目的IP的数据
-        if DesID_List[0] in Company_List:
-            # 获取配置文件中的类名
-            class_name = Company_List[DesID_List[0]]
-            # 获取配置文件中的函数名
-            Device_List = profile_data[class_name][1:]
-            Def_Name = Get_defname(DesID_List[1] ,Device_List)
-            # 将获取的函数名和类名实例化并且执行
-            operator.methodcaller(Def_Name ,Field_Value)(globals()[class_name])
-        # 处理默认值
-        else:
-            if len(Field_Value[0].strip("\n")) == 8:
-                MOUSE.Value_2_plt(Field_Value)
-            elif len(Field_Value[0].strip("\n")) == 16:
-                KEYBOARD.Value_2_PlainText(Field_Value)
-            else:
-                print(f"[-] 地址为 {Other_ip} 的数据未能解密\n" ,"-"*50)
+                # 处理目的IP的数据
+                if DesID_List[0] in Company_List:
+                    # 获取配置文件中的类名
+                    class_name = Company_List[DesID_List[0]]
+                    # 获取配置文件中的函数名
+                    Device_List = profile_data[class_name][1:]
+                    Def_Name = Get_defname(DesID_List[1] ,Device_List)
+                    # 将获取的函数名和类名实例化并且执行
+                    operator.methodcaller(Def_Name ,Field_Value)(globals()[class_name])
+                # 处理默认值
+                else:
+                    if len(Field_Value[0].strip("\n")) == 8:
+                        MOUSE.Value_2_plt(Field_Value)
+                    elif len(Field_Value[0].strip("\n")) == 16:
+                        KEYBOARD(Field_Value).Value_2_PlainText()
+                    else:
+                        Burte_Force_Class.Burte_Force_Keyboard(Field_Value)
+            except ValueError:
+                continue
 
 def main():
     # 检查系统是否是linux系统
@@ -701,7 +717,7 @@ def main():
         if len(Field_Value[0].strip("\n")) == 8:
             MOUSE.Value_2_plt(Field_Value)
         elif len(Field_Value[0].strip("\n")) == 16:
-            KEYBOARD.Value_2_PlainText(Field_Value)  
+            KEYBOARD(Field_Value).Value_2_PlainText()  
 
     # 询问是否需要爆破所有的值
     Brute_Choice = input("需要爆破所有的数据吗?[y/N](也许会不准确or是报错):").upper()
@@ -713,7 +729,6 @@ def main():
     Burteforce(file ,ip ,profile_data ,Company_List)
     
 
-    os.remove("temp_dataType.out")
     os.remove("temp_ALLIP.out")
     END.Message()
 
